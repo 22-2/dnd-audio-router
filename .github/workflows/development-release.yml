@@ -1,0 +1,76 @@
+name: Development release
+
+# main の CI が成功したら、開発版（v0.0.0-dev）のプレリリースを作り直す。
+# .vscode の「Update dev build」タスクは、このリリースの exe を取得する。
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# 連続して push されたときは、古い実行を止めて最新の版だけを公開する。
+concurrency:
+  group: development-release
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Build and publish the dev build
+    # CI が失敗した版は公開しない。手動実行はいつでも許す。
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: windows-latest
+    steps:
+      - name: Check out the tested commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      # インストーラーは作らず、実行ファイルだけを作る。
+      - name: Build the executable
+        run: pnpm tauri build --no-bundle
+
+      - name: Replace the dev release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          $asset = 'dnd-audio-router_dev_x64.exe'
+          Copy-Item -LiteralPath 'src-tauri/target/release/dnd-audio-router.exe' -Destination $asset
+
+          # 既存の開発版は、タグごと作り直す。無い場合は何もしない。
+          gh release view v0.0.0-dev --repo $env:REPO *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release delete v0.0.0-dev --repo $env:REPO --yes --cleanup-tag
+            if ($LASTEXITCODE -ne 0) { throw '既存の開発版を削除できませんでした。' }
+          }
+
+          gh release create v0.0.0-dev $asset `
+            --repo $env:REPO `
+            --target $env:TARGET_SHA `
+            --prerelease `
+            --title 'Development build' `
+            --notes "main の $($env:TARGET_SHA.Substring(0, 7)) から作った開発版です。"
+          if ($LASTEXITCODE -ne 0) { throw '開発版のリリースを作れませんでした。' }
