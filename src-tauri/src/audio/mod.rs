@@ -1,6 +1,8 @@
 //! Windows の音声（Core Audio）への入口。
 
 pub mod devices;
+pub mod policy;
+pub mod routing;
 pub mod sessions;
 
 use serde::Serialize;

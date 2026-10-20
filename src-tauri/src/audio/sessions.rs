@@ -164,7 +164,7 @@ fn device_observations(device: &IMMDevice) -> Result<Vec<SessionObservation>, St
 }
 
 /// 起動中の全プロセスについて、PID から実行ファイル名への対応を作る。
-fn process_names() -> HashMap<u32, String> {
+pub fn process_names() -> HashMap<u32, String> {
     let mut names = HashMap::new();
     // SAFETY: プロセスの一覧のスナップショットを作る。下で必ず閉じる。
     let snapshot = match unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) } {
