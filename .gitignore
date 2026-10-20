@@ -152,3 +152,7 @@ vite.config.ts.timestamp-*
 playwright-report/
 test-results/
 blob-report/
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
