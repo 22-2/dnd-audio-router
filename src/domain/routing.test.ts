@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   addStreamLane,
+  assignLaneDevice,
   assignStreamLane,
   createInitialState,
   setMonitorEnabled,
@@ -124,5 +125,49 @@ describe("addStreamLane", () => {
     expect(next.lanes).toHaveLength(state.lanes.length + 1);
     expect(added).toMatchObject({ name: "仮想デバイスC", kind: "stream" });
     expect(state.lanes.some((lane) => lane.id === added!.id)).toBe(false);
+  });
+});
+
+describe("assignLaneDevice", () => {
+  it("初期状態では、どのレーンも実デバイスに結びついていない", () => {
+    const state = createInitialState();
+
+    for (const lane of state.lanes) {
+      expect(lane.deviceId).toBeNull();
+    }
+  });
+
+  it("配信用レーンに実デバイスを割り当てる", () => {
+    const state = createInitialState();
+    const [streamLane] = state.lanes.filter((lane) => lane.kind === "stream");
+
+    const next = assignLaneDevice(state, streamLane.id, "dev-cable");
+
+    expect(next.lanes.find((lane) => lane.id === streamLane.id)?.deviceId).toBe("dev-cable");
+  });
+
+  it("自分が聞くレーンにも実デバイスを割り当てる", () => {
+    const state = createInitialState();
+    const monitorLane = state.lanes.find((lane) => lane.kind === "monitor")!;
+
+    const next = assignLaneDevice(state, monitorLane.id, "dev-realtek");
+
+    expect(next.lanes.find((lane) => lane.id === monitorLane.id)?.deviceId).toBe("dev-realtek");
+  });
+
+  it("nullを渡すと割り当てを外す", () => {
+    const state = createInitialState();
+    const [streamLane] = state.lanes.filter((lane) => lane.kind === "stream");
+    const assigned = assignLaneDevice(state, streamLane.id, "dev-cable");
+
+    const next = assignLaneDevice(assigned, streamLane.id, null);
+
+    expect(next.lanes.find((lane) => lane.id === streamLane.id)?.deviceId).toBeNull();
+  });
+
+  it("存在しないレーンへの割り当ては拒否する", () => {
+    const state = createInitialState();
+
+    expect(() => assignLaneDevice(state, "lane-missing", "dev-cable")).toThrow();
   });
 });

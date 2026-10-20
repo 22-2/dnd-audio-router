@@ -58,6 +58,7 @@ export function App() {
               key={lane.id}
               lane={lane}
               routedApps={apps.filter((app) => app.stream.laneId === lane.id)}
+              devices={outputDevices}
             />
           ))}
           {monitorLanes.map((lane) => (
@@ -65,6 +66,7 @@ export function App() {
               key={lane.id}
               lane={lane}
               routedApps={apps.filter((app) => app.monitor.enabled)}
+              devices={outputDevices}
             />
           ))}
         </div>

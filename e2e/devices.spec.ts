@@ -18,6 +18,22 @@ test.describe("出力デバイス", () => {
     await expect(section.getByText("ヘッドセット (Bluetooth)")).toBeVisible();
   });
 
+  test("出力レーンの接続先に実デバイスを選ぶと、その選択がレーンに反映される", async ({ page }) => {
+    await installFakeBackend(page, {
+      outputDevices: [
+        { id: "dev-cable", name: "CABLE Input (VB-Audio Virtual Cable)" },
+        { id: "dev-realtek", name: "スピーカー (Realtek(R) Audio)" },
+      ],
+    });
+    await page.goto("/");
+
+    const laneA = page.getByRole("region", { name: "仮想デバイスA" });
+    const destination = laneA.getByRole("combobox", { name: "接続先" });
+    await destination.selectOption({ label: "CABLE Input (VB-Audio Virtual Cable)" });
+
+    await expect(destination).toHaveValue("dev-cable");
+  });
+
   test("デバイスを取得できないときは、その旨を表示する", async ({ page }) => {
     await installFakeBackend(page, { outputDevicesError: "CoCreateInstance failed" });
 

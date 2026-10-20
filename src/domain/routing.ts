@@ -9,6 +9,8 @@ export interface Lane {
   name: string;
   /** stream は配信用（仮想デバイス）、monitor は自分が聞く出力（Realtek など）。 */
   kind: LaneKind;
+  /** レーンが届ける先の実デバイスID。未選択なら null。 */
+  deviceId: string | null;
 }
 
 /** 配信の送り先。laneId が null のときは配信しない（「なし」）。 */
@@ -70,9 +72,9 @@ function assertStreamLane(lane: Lane): void {
 export function createInitialState(): RoutingState {
   return {
     lanes: [
-      { id: "lane-virtual-a", name: "仮想デバイスA", kind: "stream" },
-      { id: "lane-virtual-b", name: "仮想デバイスB", kind: "stream" },
-      { id: "lane-realtek", name: "Realtek", kind: "monitor" },
+      { id: "lane-virtual-a", name: "仮想デバイスA", kind: "stream", deviceId: null },
+      { id: "lane-virtual-b", name: "仮想デバイスB", kind: "stream", deviceId: null },
+      { id: "lane-realtek", name: "Realtek", kind: "monitor", deviceId: null },
     ],
     apps: [
       { id: "app-discord", name: "Discord", stream: emptyStream(), monitor: emptyMonitor() },
@@ -136,5 +138,18 @@ export function setMonitorPan(state: RoutingState, appId: string, pan: number): 
 /** 配信用レーンを末尾に1つ足す。ID は既存と重ならない連番にする。 */
 export function addStreamLane(state: RoutingState, name: string): RoutingState {
   const id = `lane-stream-${state.lanes.length + 1}`;
-  return { ...state, lanes: [...state.lanes, { id, name, kind: "stream" }] };
+  return { ...state, lanes: [...state.lanes, { id, name, kind: "stream", deviceId: null }] };
+}
+
+/** レーンが届ける実デバイスを変える。null を渡すと未選択に戻す。 */
+export function assignLaneDevice(
+  state: RoutingState,
+  laneId: string,
+  deviceId: string | null,
+): RoutingState {
+  findLane(state, laneId);
+  return {
+    ...state,
+    lanes: state.lanes.map((lane) => (lane.id === laneId ? { ...lane, deviceId } : lane)),
+  };
 }

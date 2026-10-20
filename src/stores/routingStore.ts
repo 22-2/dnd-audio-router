@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { errorMessage, listOutputDevices, type OutputDevice } from "../lib/backend";
 import {
   addStreamLane,
+  assignLaneDevice,
   assignStreamLane,
   createInitialState,
   setMonitorEnabled,
@@ -22,6 +23,7 @@ interface RoutingActions {
   setMonitorVolume: (appId: string, volume: number) => void;
   setMonitorPan: (appId: string, pan: number) => void;
   addStreamLane: (name: string) => void;
+  assignLaneDevice: (laneId: string, deviceId: string | null) => void;
 }
 
 // 画面が読む状態と、それを変える操作。中身の規則はすべて domain/routing にある。
@@ -49,4 +51,5 @@ export const useRoutingStore = create<RoutingState & DeviceState & RoutingAction
   setMonitorVolume: (appId, volume) => set((state) => setMonitorVolume(state, appId, volume)),
   setMonitorPan: (appId, pan) => set((state) => setMonitorPan(state, appId, pan)),
   addStreamLane: (name) => set((state) => addStreamLane(state, name)),
+  assignLaneDevice: (laneId, deviceId) => set((state) => assignLaneDevice(state, laneId, deviceId)),
 }));
