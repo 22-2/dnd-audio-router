@@ -47,4 +47,28 @@ test.describe("音声ルーター", () => {
 
     await expect(page.getByRole("region", { name: "仮想デバイスC" })).toBeVisible();
   });
+
+  test("配信の左右を変えると、表示が左右の文字に変わる", async ({ page }) => {
+    const stream = page
+      .getByRole("article", { name: "Discord" })
+      .getByRole("region", { name: "配信" });
+    await stream.getByText("左右").click();
+
+    await stream.getByRole("slider", { name: "配信の左右" }).fill("-40");
+
+    await expect(stream.getByText("左40")).toBeVisible();
+  });
+
+  test("自分の左右は、聞くをオンにするまで操作できない", async ({ page }) => {
+    const vlc = page.getByRole("article", { name: "VLC" });
+    const monitor = vlc.getByRole("region", { name: "自分" });
+    await monitor.getByText("左右").click();
+
+    await expect(monitor.getByRole("slider", { name: "自分の左右" })).toBeDisabled();
+
+    await vlc.getByRole("checkbox", { name: "聞く" }).check();
+    await monitor.getByRole("slider", { name: "自分の左右" }).fill("25");
+
+    await expect(monitor.getByText("右25")).toBeVisible();
+  });
 });
