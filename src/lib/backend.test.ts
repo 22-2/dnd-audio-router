@@ -1,7 +1,7 @@
 import { clearMocks, mockIPC } from "@tauri-apps/api/mocks";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { listOutputDevices } from "./backend";
+import { listAudioSessions, listOutputDevices } from "./backend";
 
 describe("listOutputDevices", () => {
   afterEach(() => {
@@ -26,5 +26,23 @@ describe("listOutputDevices", () => {
     });
 
     await expect(listOutputDevices()).rejects.toBe("CoCreateInstance failed");
+  });
+});
+
+describe("listAudioSessions", () => {
+  afterEach(() => {
+    clearMocks();
+  });
+
+  it("音声セッションを持つプロセスの一覧をそのまま返す", async () => {
+    mockIPC((cmd) => {
+      if (cmd === "list_audio_sessions") {
+        return [{ pid: 49652, exe_name: "PotPlayerMini64.exe", playing: true }];
+      }
+    });
+
+    await expect(listAudioSessions()).resolves.toEqual([
+      { pid: 49652, exe_name: "PotPlayerMini64.exe", playing: true },
+    ]);
   });
 });

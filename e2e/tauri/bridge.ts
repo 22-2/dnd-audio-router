@@ -10,10 +10,17 @@ export interface FakeOutputDevice {
   name: string;
 }
 
+export interface FakeAudioSession {
+  pid: number;
+  exe_name: string;
+  playing: boolean;
+}
+
 export interface FakeBackendOptions {
   outputDevices?: FakeOutputDevice[];
   /** 指定すると、出力デバイスの取得がこのエラーで失敗する。 */
   outputDevicesError?: string;
+  audioSessions?: FakeAudioSession[];
 }
 
 export async function installFakeBackend(
@@ -30,6 +37,9 @@ export async function installFakeBackend(
             }
             return fake.outputDevices;
           }
+          if (cmd === "list_audio_sessions") {
+            return fake.audioSessions;
+          }
           throw new Error(`未対応のコマンド: ${cmd}`);
         },
       };
@@ -38,6 +48,7 @@ export async function installFakeBackend(
     {
       outputDevices: options.outputDevices ?? [],
       outputDevicesError: options.outputDevicesError ?? null,
+      audioSessions: options.audioSessions ?? [],
     },
   );
 }

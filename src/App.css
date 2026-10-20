@@ -82,6 +82,15 @@ body {
   color: var(--color-danger);
 }
 
+.app__empty {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.devices__state {
+  color: var(--color-text-muted);
+}
+
 .lanes,
 .apps {
   display: grid;
