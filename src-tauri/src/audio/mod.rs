@@ -1,6 +1,7 @@
 //! Windows の音声（Core Audio）への入口。
 
 pub mod devices;
+pub mod sessions;
 
 use serde::Serialize;
 use windows::Win32::Foundation::RPC_E_CHANGED_MODE;

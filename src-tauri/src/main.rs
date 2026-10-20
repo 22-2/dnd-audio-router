@@ -6,7 +6,10 @@ mod commands;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![commands::list_output_devices])
+        .invoke_handler(tauri::generate_handler![
+            commands::list_output_devices,
+            commands::list_audio_sessions,
+        ])
         .run(tauri::generate_context!())
         .expect("Tauri アプリの起動に失敗しました");
 }
