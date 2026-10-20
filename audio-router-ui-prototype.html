@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>音声ルーター UIプロトタイプ</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface-1: #ffffff;
+    --surface-2: #efefeb;
+    --text: #1c1c1a;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border-strong: rgba(0,0,0,0.22);
+    --accent: #185fa5;
+    --accent-bg: #e6f1fb;
+    --radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --surface-1: #2a2a27;
+      --surface-2: #232321;
+      --text: #f1efe8;
+      --text-2: #b4b2a9;
+      --text-3: #888780;
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.22);
+      --accent: #85b7eb;
+      --accent-bg: #0c447c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Yu Gothic UI", "Hiragino Sans", "Meiryo", sans-serif;
+    font-size: 14px;
+  }
+  h1 { font-size: 18px; font-weight: 500; margin: 0 0 4px; }
+  .lead { color: var(--text-2); font-size: 13px; margin: 0 0 20px; }
+  .section-title { font-size: 13px; color: var(--text-2); margin: 0 0 8px; }
+  .lanes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .lane {
+    background: var(--surface-2);
+    border: 1px dashed var(--border-strong);
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .lane.over { border-style: solid; border-color: var(--accent); }
+  .lane-title { font-weight: 500; }
+  .lane-sub { font-size: 12px; color: var(--text-3); }
+  .lane-items { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .lane-item {
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  .empty { font-size: 12px; color: var(--text-3); }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    background: var(--surface-1);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: grab;
+  }
+  .card.dragging { opacity: 0.4; }
+  .head { display: flex; align-items: center; gap: 8px; }
+  .ico {
+    width: 28px; height: 28px;
+    border-radius: var(--radius);
+    background: var(--accent-bg);
+    color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 13px; flex-shrink: 0;
+  }
+  .nm { font-weight: 500; flex: 1; }
+  .del {
+    background: transparent; border: none; color: var(--text-3);
+    font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1;
+  }
+  .block {
+    border-top: 0.5px solid var(--border);
+    padding-top: 8px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .block-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--text-2); }
+  .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--text-2);
+  }
+  select {
+    font: inherit; font-size: 12px;
+    padding: 3px 6px;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .mv { display: grid; grid-template-columns: 1fr 32px; gap: 8px; align-items: center; }
+  .mv input, .lr input { width: 100%; }
+  .val { font-size: 12px; text-align: right; }
+  details summary {
+    font-size: 12px; color: var(--text-2); cursor: pointer; list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: "▸ "; }
+  details[open] summary::before { content: "▾ "; }
+  .lr { display: grid; gap: 6px; margin-top: 6px; }
+  .lr-row { display: grid; grid-template-columns: 16px 1fr 32px; gap: 8px; align-items: center; font-size: 12px; color: var(--text-2); }
+  .lr-row .val { color: var(--text); }
+  .off { opacity: 0.45; pointer-events: none; }
+  .add {
+    border: 1px dashed var(--border-strong);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-3);
+    min-height: 140px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .note { font-size: 12px; color: var(--text-3); margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1>音声ルーター UIプロトタイプ</h1>
+<p class="lead">アプリをドラッグして配信先レーンへ送ると、配信に乗ります。自分用はRealtekレーンに送ると、自分の耳に届きます。音量は常時表示、左右は折りたたみです。</p>
+
+<div class="section-title">出力レーン</div>
+<div class="lanes" id="lanes"></div>
+
+<div class="section-title">アプリ</div>
+<div class="cards" id="cards"></div>
+
+<p class="note">※このプロトタイプは見た目と操作のみです。実際の音は鳴りません。</p>
+
+<script>
+  const LANES = [
+    { id: "A", kind: "stream", name: "仮想デバイスA", sub: "配信用" },
+    { id: "B", kind: "stream", name: "仮想デバイスB", sub: "配信用" },
+    { id: "R", kind: "monitor", name: "Realtek", sub: "自分が聞く" }
+  ];
+
+  const state = {
+    nextId: 4,
+    apps: [
+      { id: 1, name: "Discord", icon: "D", stream: "A", monitor: false,
+        s: { v: 100, l: 100, r: 100 }, m: { v: 100, l: 100, r: 100 } },
+      { id: 2, name: "VLC", icon: "V", stream: "B", monitor: true,
+        s: { v: 70, l: 100, r: 40 }, m: { v: 50, l: 100, r: 100 } },
+      { id: 3, name: "Chrome", icon: "C", stream: null, monitor: true,
+        s: { v: 100, l: 100, r: 100 }, m: { v: 100, l: 100, r: 100 } }
+    ]
+  };
+
+  let dragId = null;
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  function streamLabel(id) {
+    const l = LANES.find(x => x.id === id);
+    return l ? l.name : "なし";
+  }
+
+  function renderLanes() {
+    const wrap = document.getElementById("lanes");
+    wrap.innerHTML = LANES.map(lane => {
+      const items = lane.kind === "stream"
+        ? state.apps.filter(a => a.stream === lane.id)
+        : state.apps.filter(a => a.monitor);
+      const body = items.length
+        ? items.map(a => `<div class="lane-item">${esc(a.name)}</div>`).join("")
+        : `<div class="empty">ここにアプリをドロップ</div>`;
+      return `
+        <div class="lane" data-lane="${lane.id}">
+          <div class="lane-title">${esc(lane.name)}</div>
+          <div class="lane-sub">${esc(lane.sub)}</div>
+          <div class="lane-items">${body}</div>
+        </div>`;
+    }).join("");
+  }
+
+  function sliderRow(appId, sendKey, key, value) {
+    return `<div class="lr-row"><span>${key === "l" ? "L" : "R"}</span>
+      <input type="range" min="0" max="100" value="${value}" data-app="${appId}" data-send="${sendKey}" data-key="${key}">
+      <span class="val">${value}</span></div>`;
+  }
+
+  function renderCards() {
+    const wrap = document.getElementById("cards");
+    const cards = state.apps.map(a => {
+      const streamOpts = [{ v: "", t: "なし" }, { v: "A", t: "仮想デバイスA" }, { v: "B", t: "仮想デバイスB" }]
+        .map(o => `<option value="${o.v}" ${(a.stream || "") === o.v ? "selected" : ""}>${o.t}</option>`).join("");
+      return `
+        <div class="card" draggable="true" data-id="${a.id}">
+          <div class="head">
+            <span class="ico">${esc(a.icon)}</span>
+            <span class="nm">${esc(a.name)}</span>
+            <button class="del" data-del="${a.id}" aria-label="削除">×</button>
+          </div>
+
+          <div class="block">
+            <div class="block-head">
+              <span class="tag">配信</span>
+              <select data-stream="${a.id}">${streamOpts}</select>
+            </div>
+            <div class="mv">
+              <input type="range" min="0" max="100" value="${a.s.v}" data-app="${a.id}" data-send="s" data-key="v">
+              <span class="val">${a.s.v}</span>
+            </div>
+            <details>
+              <summary>左右</summary>
+              <div class="lr">
+                ${sliderRow(a.id, "s", "l", a.s.l)}
+                ${sliderRow(a.id, "s", "r", a.s.r)}
+              </div>
+            </details>
+          </div>
+
+          <div class="block">
+            <div class="block-head">
+              <span class="tag">自分</span>
+              <label><input type="checkbox" data-monitor="${a.id}" ${a.monitor ? "checked" : ""}> 聞く</label>
+            </div>
+            <div class="${a.monitor ? "" : "off"}">
+              <div class="mv">
+                <input type="range" min="0" max="100" value="${a.m.v}" data-app="${a.id}" data-send="m" data-key="v">
+                <span class="val">${a.m.v}</span>
+              </div>
+              <details>
+                <summary>左右</summary>
+                <div class="lr">
+                  ${sliderRow(a.id, "m", "l", a.m.l)}
+                  ${sliderRow(a.id, "m", "r", a.m.r)}
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>`;
+    }).join("");
+    wrap.innerHTML = cards + `<button class="add" id="add">+ アプリを追加</button>`;
+  }
+
+  function render() {
+    renderLanes();
+    renderCards();
+  }
+
+  function findApp(id) {
+    return state.apps.find(a => a.id === Number(id));
+  }
+
+  // 音量・L/Rの変更は再描画せず、値だけ更新する
+  document.getElementById("cards").addEventListener("input", e => {
+    const t = e.target;
+    if (t.type !== "range" || !t.dataset.app) return;
+    const app = findApp(t.dataset.app);
+    const send = app[t.dataset.send];
+    const v = Math.round(Number(t.value));
+    send[t.dataset.key] = v;
+    const readout = t.parentElement.querySelector(".val");
+    if (readout) readout.textContent = v;
+  });
+
+  document.getElementById("cards").addEventListener("change", e => {
+    const t = e.target;
+    if (t.matches("select[data-stream]")) {
+      findApp(t.dataset.stream).stream = t.value || null;
+      render();
+    } else if (t.matches("input[data-monitor]")) {
+      findApp(t.dataset.monitor).monitor = t.checked;
+      render();
+    }
+  });
+
+  document.getElementById("cards").addEventListener("click", e => {
+    const del = e.target.closest("[data-del]");
+    if (del) {
+      state.apps = state.apps.filter(a => a.id !== Number(del.dataset.del));
+      render();
+      return;
+    }
+    if (e.target.id === "add") {
+      const name = prompt("アプリ名を入力してください", "新しいアプリ");
+      if (!name) return;
+      state.apps.push({
+        id: state.nextId++, name: name.trim(), icon: name.trim().charAt(0).toUpperCase(),
+        stream: null, monitor: true,
+        s: { v: 100, l: 100, r: 100 }, m: { v: 100, l: 100, r: 100 }
+      });
+      render();
+    }
+  });
+
+  // ドラッグ&ドロップ
+  document.getElementById("cards").addEventListener("dragstart", e => {
+    const card = e.target.closest(".card");
+    if (!card) return;
+    dragId = card.dataset.id;
+    card.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", dragId);
+  });
+  document.getElementById("cards").addEventListener("dragend", e => {
+    const card = e.target.closest(".card");
+    if (card) card.classList.remove("dragging");
+  });
+
+  const lanesEl = document.getElementById("lanes");
+  lanesEl.addEventListener("dragover", e => {
+    const lane = e.target.closest(".lane");
+    if (!lane) return;
+    e.preventDefault();
+    lane.classList.add("over");
+  });
+  lanesEl.addEventListener("dragleave", e => {
+    const lane = e.target.closest(".lane");
+    if (lane) lane.classList.remove("over");
+  });
+  lanesEl.addEventListener("drop", e => {
+    const lane = e.target.closest(".lane");
+    if (!lane || dragId == null) return;
+    e.preventDefault();
+    const app = findApp(dragId);
+    const laneId = lane.dataset.lane;
+    if (laneId === "R") {
+      app.monitor = true;
+    } else {
+      app.stream = laneId;
+    }
+    dragId = null;
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>
