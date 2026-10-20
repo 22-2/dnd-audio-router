@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import { installFakeBackend } from "./tauri/bridge";
+
 test.describe("音声ルーター", () => {
   test.beforeEach(async ({ page }) => {
+    await installFakeBackend(page);
     await page.goto("/");
   });
 

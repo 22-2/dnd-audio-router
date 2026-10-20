@@ -1,5 +1,6 @@
 import { create } from "zustand";
 
+import { errorMessage, listOutputDevices, type OutputDevice } from "../lib/backend";
 import {
   addStreamLane,
   assignStreamLane,
@@ -13,6 +14,7 @@ import {
 } from "../domain/routing";
 
 interface RoutingActions {
+  loadOutputDevices: () => Promise<void>;
   assignStreamLane: (appId: string, laneId: string | null) => void;
   setMonitorEnabled: (appId: string, enabled: boolean) => void;
   setStreamVolume: (appId: string, volume: number) => void;
@@ -23,8 +25,23 @@ interface RoutingActions {
 }
 
 // 画面が読む状態と、それを変える操作。中身の規則はすべて domain/routing にある。
-export const useRoutingStore = create<RoutingState & RoutingActions>()((set) => ({
+interface DeviceState {
+  outputDevices: OutputDevice[];
+  /** 出力デバイスの取得に失敗したときの理由。取得できていれば null。 */
+  outputDevicesError: string | null;
+}
+
+export const useRoutingStore = create<RoutingState & DeviceState & RoutingActions>()((set) => ({
   ...createInitialState(),
+  outputDevices: [],
+  outputDevicesError: null,
+  loadOutputDevices: async () => {
+    try {
+      set({ outputDevices: await listOutputDevices(), outputDevicesError: null });
+    } catch (error) {
+      set({ outputDevicesError: errorMessage(error) });
+    }
+  },
   assignStreamLane: (appId, laneId) => set((state) => assignStreamLane(state, appId, laneId)),
   setMonitorEnabled: (appId, enabled) => set((state) => setMonitorEnabled(state, appId, enabled)),
   setStreamVolume: (appId, volume) => set((state) => setStreamVolume(state, appId, volume)),

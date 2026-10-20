@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { AppCard } from "./components/AppCard";
 import { LaneSection } from "./components/LaneSection";
 import { useRoutingStore } from "./stores/routingStore";
@@ -12,6 +14,13 @@ export function App() {
   const lanes = useRoutingStore((state) => state.lanes);
   const apps = useRoutingStore((state) => state.apps);
   const addStreamLane = useRoutingStore((state) => state.addStreamLane);
+  const outputDevices = useRoutingStore((state) => state.outputDevices);
+  const outputDevicesError = useRoutingStore((state) => state.outputDevicesError);
+  const loadOutputDevices = useRoutingStore((state) => state.loadOutputDevices);
+
+  useEffect(() => {
+    void loadOutputDevices();
+  }, [loadOutputDevices]);
 
   const streamLanes = lanes.filter((lane) => lane.kind === "stream");
   const monitorLanes = lanes.filter((lane) => lane.kind === "monitor");
@@ -19,6 +28,25 @@ export function App() {
   return (
     <main className="app">
       <h1 className="app__title">音声ルーター</h1>
+
+      <section className="app__section" aria-labelledby="devices-heading">
+        <h2 id="devices-heading" className="app__heading">
+          出力デバイス
+        </h2>
+        {outputDevicesError ? (
+          <p role="alert" className="app__error">
+            デバイスを取得できませんでした: {outputDevicesError}
+          </p>
+        ) : (
+          <ul className="devices">
+            {outputDevices.map((device) => (
+              <li key={device.id} className="devices__item">
+                {device.name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="app__section" aria-labelledby="output-lanes-heading">
         <h2 id="output-lanes-heading" className="app__heading">
