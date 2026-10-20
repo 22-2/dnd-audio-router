@@ -12,7 +12,7 @@ test.describe("音声ルーター", () => {
     for (const lane of ["仮想デバイスA", "仮想デバイスB", "Realtek"]) {
       await expect(page.getByRole("region", { name: lane })).toBeVisible();
     }
-    for (const app of ["Discord", "VLC", "Chrome"]) {
+    for (const app of ["Discord", "PotPlayer", "Chrome"]) {
       await expect(page.getByRole("article", { name: app })).toBeVisible();
     }
   });
@@ -27,8 +27,8 @@ test.describe("音声ルーター", () => {
   });
 
   test("自分が聞くをオンにすると、チェックが入る", async ({ page }) => {
-    const vlc = page.getByRole("article", { name: "VLC" });
-    const listen = vlc.getByRole("checkbox", { name: "聞く" });
+    const potplayer = page.getByRole("article", { name: "PotPlayer" });
+    const listen = potplayer.getByRole("checkbox", { name: "聞く" });
 
     await listen.check();
 
@@ -63,13 +63,13 @@ test.describe("音声ルーター", () => {
   });
 
   test("自分の左右は、聞くをオンにするまで操作できない", async ({ page }) => {
-    const vlc = page.getByRole("article", { name: "VLC" });
-    const monitor = vlc.getByRole("region", { name: "自分" });
+    const potplayer = page.getByRole("article", { name: "PotPlayer" });
+    const monitor = potplayer.getByRole("region", { name: "自分" });
     await monitor.getByText("左右").click();
 
     await expect(monitor.getByRole("slider", { name: "自分の左右" })).toBeDisabled();
 
-    await vlc.getByRole("checkbox", { name: "聞く" }).check();
+    await potplayer.getByRole("checkbox", { name: "聞く" }).check();
     await monitor.getByRole("slider", { name: "自分の左右" }).fill("25");
 
     await expect(monitor.getByText("右25")).toBeVisible();

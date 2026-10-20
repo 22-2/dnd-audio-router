@@ -78,7 +78,7 @@ export function createInitialState(): RoutingState {
     ],
     apps: [
       { id: "app-discord", name: "Discord", stream: emptyStream(), monitor: emptyMonitor() },
-      { id: "app-vlc", name: "VLC", stream: emptyStream(), monitor: emptyMonitor() },
+      { id: "app-potplayer", name: "PotPlayer", stream: emptyStream(), monitor: emptyMonitor() },
       { id: "app-chrome", name: "Chrome", stream: emptyStream(), monitor: emptyMonitor() },
     ],
   };
