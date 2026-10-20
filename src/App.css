@@ -1,0 +1,136 @@
+/* デザイントークン。色と間隔はここで決め、各ルールは変数だけを参照する。 */
+:root {
+  --color-bg: #111214;
+  --color-surface: #1c1d21;
+  --color-surface-raised: #26282d;
+  --color-border: #2e3036;
+  --color-text: #e8e8ea;
+  --color-text-muted: #9a9ca3;
+  --color-accent: #8ab4f8;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  --radius: 10px;
+  --font-size-base: 14px;
+
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Yu Gothic UI", "Segoe UI", system-ui, sans-serif;
+  font-size: var(--font-size-base);
+}
+
+.app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4);
+}
+
+.app__title {
+  margin: 0 0 var(--space-4);
+  font-size: 20px;
+}
+
+.app__section {
+  margin-bottom: var(--space-5);
+}
+
+.app__heading {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.app__add-lane {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.lanes,
+.apps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3);
+}
+
+.lane {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.lane__name {
+  margin: 0;
+  font-size: 15px;
+}
+
+.lane__caption {
+  margin: var(--space-1) 0 var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.lane__apps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lane__app {
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  border-radius: 6px;
+  background: var(--color-surface-raised);
+}
+
+.app-card {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  cursor: grab;
+}
+
+.app-card__name {
+  margin: 0 0 var(--space-3);
+  font-size: 15px;
+}
+
+.app-card__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.app-card__row input[type="range"] {
+  flex: 1;
+  accent-color: var(--color-accent);
+}
+
+.app-card__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 48px;
+  color: var(--color-text-muted);
+}
+
+.app-card__value {
+  min-width: 32px;
+  text-align: right;
+}
