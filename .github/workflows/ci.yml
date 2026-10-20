@@ -91,3 +91,47 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  # 第4層: Rust側。Tauri は dist/ を読んでビルドするので、先にフロントをビルドする。
+  # 音声の処理は Windows でしか動かないため、ジョブも Windows で動かす。
+  rust-check:
+    name: Rust Check & Clippy
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: cargo fmt check
+        run: cargo fmt -- --check
+        working-directory: src-tauri
+
+      - name: cargo check
+        run: cargo check
+        working-directory: src-tauri
+
+      - name: cargo clippy
+        run: cargo clippy -- -D warnings
+        working-directory: src-tauri
+
+      - name: cargo test
+        run: cargo test
+        working-directory: src-tauri
