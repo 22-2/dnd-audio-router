@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // 開発版（v0.0.0-dev）を取得して C:\Applications\bins の exe を差し替え、起動中のものは止めてから再起動する
+    // 本体は V:\repos\scripts\Update-DevBuild.ps1。main の CI が成功してから取得する。
+    {
+      "label": "dnd-audio-router: Update dev build and restart",
+      "type": "process",
+      "command": "pwsh.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-File",
+        "V:\\repos\\scripts\\Update-DevBuild.ps1",
+        "-Repo",
+        "22-2/dnd-audio-router",
+        "-ExecutablePath",
+        "C:\\Applications\\bins\\dnd-audio-router.exe",
+        "-AssetName",
+        "dnd-audio-router_dev_x64.exe",
+        "-CiWorkflow",
+        "ci.yml",
+        "-CiBranch",
+        "main"
+      ],
+      "presentation": { "clear": true, "panel": "shared" },
+      "problemMatcher": []
+    }
+  ]
+}
