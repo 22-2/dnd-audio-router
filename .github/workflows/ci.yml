@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
 
 jobs:
   # 第1層: 型・整形・lint・ビルド。壊れたコードはテストする前に止める。
