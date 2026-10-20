@@ -23,6 +23,16 @@ export function listAudioSessions(): Promise<AudioSession[]> {
   return invoke<AudioSession[]>("list_audio_sessions");
 }
 
+/** アプリの再生先を、指定したデバイスへ向けるよう依頼する。 */
+export function routeAppToDevice(pid: number, deviceId: string): Promise<void> {
+  return invoke<void>("route_app_to_device", { pid, deviceId });
+}
+
+/** アプリの再生先を、システムの既定に戻すよう依頼する。 */
+export function releaseApp(pid: number): Promise<void> {
+  return invoke<void>("release_app", { pid });
+}
+
 /** Tauri のエラーは文字列で届くことが多いので、どちらの形でも文字にする。 */
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { AppCard } from "./components/AppCard";
 import { LaneSection } from "./components/LaneSection";
+import { SessionRow } from "./components/SessionRow";
 import { useRoutingStore } from "./stores/routingStore";
 import "./App.css";
 
@@ -20,6 +21,7 @@ export function App() {
   const audioSessions = useRoutingStore((state) => state.audioSessions);
   const audioSessionsError = useRoutingStore((state) => state.audioSessionsError);
   const loadAudioSessions = useRoutingStore((state) => state.loadAudioSessions);
+  const routeError = useRoutingStore((state) => state.routeError);
 
   useEffect(() => {
     void loadOutputDevices();
@@ -44,14 +46,18 @@ export function App() {
         ) : audioSessions.length === 0 ? (
           <p className="app__empty">音を出しているアプリはありません</p>
         ) : (
-          <ul className="devices">
-            {audioSessions.map((session) => (
-              <li key={session.pid} className="devices__item">
-                <span>{session.exe_name}</span>{" "}
-                <span className="devices__state">{session.playing ? "再生中" : "待機中"}</span>
-              </li>
-            ))}
-          </ul>
+          <>
+            {routeError && (
+              <p role="alert" className="app__error">
+                出力先を変えられませんでした: {routeError}
+              </p>
+            )}
+            <ul className="devices">
+              {audioSessions.map((session) => (
+                <SessionRow key={session.pid} session={session} devices={outputDevices} />
+              ))}
+            </ul>
+          </>
         )}
       </section>
 

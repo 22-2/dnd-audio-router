@@ -4,6 +4,8 @@ import {
   errorMessage,
   listAudioSessions,
   listOutputDevices,
+  releaseApp,
+  routeAppToDevice,
   type AudioSession,
   type OutputDevice,
 } from "../lib/backend";
@@ -23,6 +25,8 @@ import {
 interface RoutingActions {
   loadOutputDevices: () => Promise<void>;
   loadAudioSessions: () => Promise<void>;
+  routeSession: (pid: number, deviceId: string) => Promise<void>;
+  releaseSession: (pid: number) => Promise<void>;
   assignStreamLane: (appId: string, laneId: string | null) => void;
   setMonitorEnabled: (appId: string, enabled: boolean) => void;
   setStreamVolume: (appId: string, volume: number) => void;
@@ -41,6 +45,10 @@ interface DeviceState {
   /** 音を出しているアプリの一覧。 */
   audioSessions: AudioSession[];
   audioSessionsError: string | null;
+  /** 出力先を向けたアプリ。PID から、向けたデバイスIDへの対応。 */
+  routes: Record<number, string>;
+  /** 出力先の変更・解除に失敗したときの理由。 */
+  routeError: string | null;
 }
 
 export const useRoutingStore = create<RoutingState & DeviceState & RoutingActions>()((set) => ({
@@ -49,6 +57,27 @@ export const useRoutingStore = create<RoutingState & DeviceState & RoutingAction
   outputDevicesError: null,
   audioSessions: [],
   audioSessionsError: null,
+  routes: {},
+  routeError: null,
+  routeSession: async (pid, deviceId) => {
+    try {
+      await routeAppToDevice(pid, deviceId);
+      set((state) => ({ routes: { ...state.routes, [pid]: deviceId }, routeError: null }));
+    } catch (error) {
+      set({ routeError: errorMessage(error) });
+    }
+  },
+  releaseSession: async (pid) => {
+    try {
+      await releaseApp(pid);
+      set((state) => {
+        const { [pid]: _released, ...routes } = state.routes;
+        return { routes, routeError: null };
+      });
+    } catch (error) {
+      set({ routeError: errorMessage(error) });
+    }
+  },
   loadOutputDevices: async () => {
     try {
       set({ outputDevices: await listOutputDevices(), outputDevicesError: null });
