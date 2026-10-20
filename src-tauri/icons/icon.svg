@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- 仮のアイコン。音の波が2本の矢印に分かれる形。 -->
+  <rect width="1024" height="1024" rx="200" fill="#1c1d21"/>
+  <g fill="#8ab4f8">
+    <rect x="170" y="430" width="56" height="164" rx="28"/>
+    <rect x="262" y="330" width="56" height="364" rx="28"/>
+    <rect x="354" y="390" width="56" height="244" rx="28"/>
+  </g>
+  <g fill="none" stroke="#8ab4f8" stroke-width="56" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M500 512 H780"/>
+    <path d="M700 420 L800 512 L700 604"/>
+    <path d="M500 512 Q600 300 780 300"/>
+    <path d="M700 240 L790 300 L710 360"/>
+  </g>
+</svg>
